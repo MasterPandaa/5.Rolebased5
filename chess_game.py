@@ -1,7 +1,8 @@
-import sys
 import math
-import pygame
+import sys
 from copy import deepcopy
+
+import pygame
 
 # ---------------------------
 # Config & Constants
@@ -19,29 +20,30 @@ MOVE_DOT = (50, 50, 50, 140)
 
 # Unicode pieces
 UNICODE_PIECES = {
-    ('w', 'K'): '♔',
-    ('w', 'Q'): '♕',
-    ('w', 'R'): '♖',
-    ('w', 'B'): '♗',
-    ('w', 'N'): '♘',
-    ('w', 'P'): '♙',
-    ('b', 'K'): '♚',
-    ('b', 'Q'): '♛',
-    ('b', 'R'): '♜',
-    ('b', 'B'): '♝',
-    ('b', 'N'): '♞',
-    ('b', 'P'): '♟',
+    ("w", "K"): "♔",
+    ("w", "Q"): "♕",
+    ("w", "R"): "♖",
+    ("w", "B"): "♗",
+    ("w", "N"): "♘",
+    ("w", "P"): "♙",
+    ("b", "K"): "♚",
+    ("b", "Q"): "♛",
+    ("b", "R"): "♜",
+    ("b", "B"): "♝",
+    ("b", "N"): "♞",
+    ("b", "P"): "♟",
 }
 
 # Material values for evaluation
 MATERIAL_VALUES = {
-    'P': 1,
-    'N': 3,
-    'B': 3,
-    'R': 5,
-    'Q': 9,
-    'K': 0  # King is invaluable; keep 0 for simple eval
+    "P": 1,
+    "N": 3,
+    "B": 3,
+    "R": 5,
+    "Q": 9,
+    "K": 0,  # King is invaluable; keep 0 for simple eval
 }
+
 
 # ---------------------------
 # Board: representation & state
@@ -55,18 +57,30 @@ class Board:
     def reset(self):
         # Place black
         self.grid[0] = [
-            ('b', 'R'), ('b', 'N'), ('b', 'B'), ('b', 'Q'),
-            ('b', 'K'), ('b', 'B'), ('b', 'N'), ('b', 'R')
+            ("b", "R"),
+            ("b", "N"),
+            ("b", "B"),
+            ("b", "Q"),
+            ("b", "K"),
+            ("b", "B"),
+            ("b", "N"),
+            ("b", "R"),
         ]
-        self.grid[1] = [('b', 'P')] * 8
+        self.grid[1] = [("b", "P")] * 8
         # Empty middle
         for r in range(2, 6):
             self.grid[r] = [None] * 8
         # Place white
-        self.grid[6] = [('w', 'P')] * 8
+        self.grid[6] = [("w", "P")] * 8
         self.grid[7] = [
-            ('w', 'R'), ('w', 'N'), ('w', 'B'), ('w', 'Q'),
-            ('w', 'K'), ('w', 'B'), ('w', 'N'), ('w', 'R')
+            ("w", "R"),
+            ("w", "N"),
+            ("w", "B"),
+            ("w", "Q"),
+            ("w", "K"),
+            ("w", "B"),
+            ("w", "N"),
+            ("w", "R"),
         ]
 
     def in_bounds(self, r, c):
@@ -89,11 +103,11 @@ class Board:
             return
         color, ptype = piece
         # Pawn promotion simple rule
-        if ptype == 'P':
-            if color == 'w' and dr == 0:
-                ptype = promotion if promotion else 'Q'
-            elif color == 'b' and dr == 7:
-                ptype = promotion if promotion else 'Q'
+        if ptype == "P":
+            if color == "w" and dr == 0:
+                ptype = promotion if promotion else "Q"
+            elif color == "b" and dr == 7:
+                ptype = promotion if promotion else "Q"
         self.set(dr, dc, (color, ptype))
         self.set(sr, sc, None)
 
@@ -113,6 +127,7 @@ class Board:
                     score += val if pcolor == color else -val
         return score
 
+
 # ---------------------------
 # Rules: legal move generation per piece
 # ---------------------------
@@ -127,17 +142,50 @@ class Rules:
                 piece = board.get(r, c)
                 if piece and piece[0] == turn_color:
                     ptype = piece[1]
-                    if ptype == 'P':
+                    if ptype == "P":
                         moves.extend(self._pawn_moves(board, r, c, piece))
-                    elif ptype == 'N':
+                    elif ptype == "N":
                         moves.extend(self._knight_moves(board, r, c, piece))
-                    elif ptype == 'B':
-                        moves.extend(self._sliding_moves(board, r, c, piece, directions=[(-1,-1),(-1,1),(1,-1),(1,1)]))
-                    elif ptype == 'R':
-                        moves.extend(self._sliding_moves(board, r, c, piece, directions=[(-1,0),(1,0),(0,-1),(0,1)]))
-                    elif ptype == 'Q':
-                        moves.extend(self._sliding_moves(board, r, c, piece, directions=[(-1,-1),(-1,1),(1,-1),(1,1),(-1,0),(1,0),(0,-1),(0,1)]))
-                    elif ptype == 'K':
+                    elif ptype == "B":
+                        moves.extend(
+                            self._sliding_moves(
+                                board,
+                                r,
+                                c,
+                                piece,
+                                directions=[(-1, -1), (-1, 1), (1, -1), (1, 1)],
+                            )
+                        )
+                    elif ptype == "R":
+                        moves.extend(
+                            self._sliding_moves(
+                                board,
+                                r,
+                                c,
+                                piece,
+                                directions=[(-1, 0), (1, 0), (0, -1), (0, 1)],
+                            )
+                        )
+                    elif ptype == "Q":
+                        moves.extend(
+                            self._sliding_moves(
+                                board,
+                                r,
+                                c,
+                                piece,
+                                directions=[
+                                    (-1, -1),
+                                    (-1, 1),
+                                    (1, -1),
+                                    (1, 1),
+                                    (-1, 0),
+                                    (1, 0),
+                                    (0, -1),
+                                    (0, 1),
+                                ],
+                            )
+                        )
+                    elif ptype == "K":
                         moves.extend(self._king_moves(board, r, c, piece))
         # Note: This engine does not check for self-check legality for simplicity.
         return moves
@@ -150,8 +198,8 @@ class Rules:
 
     def _pawn_moves(self, board, r, c, piece):
         color, _ = piece
-        dir_forward = -1 if color == 'w' else 1
-        start_row = 6 if color == 'w' else 1
+        dir_forward = -1 if color == "w" else 1
+        start_row = 6 if color == "w" else 1
         moves = []
 
         # Forward 1
@@ -160,7 +208,11 @@ class Rules:
             moves.append(((r, c), (nr, nc)))
             # Forward 2 from start
             nr2 = nr + dir_forward
-            if r == start_row and board.in_bounds(nr2, nc) and board.get(nr2, nc) is None:
+            if (
+                r == start_row
+                and board.in_bounds(nr2, nc)
+                and board.get(nr2, nc) is None
+            ):
                 moves.append(((r, c), (nr2, nc)))
 
         # Captures
@@ -178,8 +230,14 @@ class Rules:
         color, _ = piece
         moves = []
         deltas = [
-            (-2, -1), (-2, 1), (2, -1), (2, 1),
-            (-1, -2), (-1, 2), (1, -2), (1, 2)
+            (-2, -1),
+            (-2, 1),
+            (2, -1),
+            (2, 1),
+            (-1, -2),
+            (-1, 2),
+            (1, -2),
+            (1, 2),
         ]
         for dr, dc in deltas:
             nr, nc = r + dr, c + dc
@@ -223,11 +281,12 @@ class Rules:
         # No castling for simplicity
         return moves
 
+
 # ---------------------------
 # Simple AI: 1-ply material capture preference
 # ---------------------------
 class SimpleAI:
-    def __init__(self, rules, color='b'):
+    def __init__(self, rules, color="b"):
         self.rules = rules
         self.color = color
 
@@ -275,15 +334,17 @@ class SimpleAI:
                     capture_best.append(mv)
 
         import random
+
         if capture_best:
             return random.choice(capture_best)
         return random.choice(best_moves)
+
 
 # ---------------------------
 # Game: input handling & rendering
 # ---------------------------
 class Game:
-    def __init__(self, ai_color='b'):
+    def __init__(self, ai_color="b"):
         pygame.init()
         pygame.display.set_caption("Mini Chess Engine (Python + Pygame)")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -298,7 +359,7 @@ class Game:
         self.rules = Rules()
         self.selected = None
         self.legal_moves_from_selected = []
-        self.current_turn = 'w'
+        self.current_turn = "w"
         self.ai = SimpleAI(self.rules, color=ai_color)
         self.ai_thinking = False
 
@@ -320,7 +381,10 @@ class Game:
             if piece and piece[0] == self.current_turn:
                 self.selected = (r, c)
                 self.legal_moves_from_selected = [
-                    mv for mv in self.rules.generate_legal_moves(self.board, self.current_turn)
+                    mv
+                    for mv in self.rules.generate_legal_moves(
+                        self.board, self.current_turn
+                    )
                     if mv[0] == self.selected
                 ]
             return
@@ -329,7 +393,8 @@ class Game:
         if piece and piece[0] == self.current_turn:
             self.selected = (r, c)
             self.legal_moves_from_selected = [
-                mv for mv in self.rules.generate_legal_moves(self.board, self.current_turn)
+                mv
+                for mv in self.rules.generate_legal_moves(self.board, self.current_turn)
                 if mv[0] == self.selected
             ]
             return
@@ -350,7 +415,7 @@ class Game:
         # Clear selection, switch turn
         self.selected = None
         self.legal_moves_from_selected = []
-        self.current_turn = 'b' if self.current_turn == 'w' else 'w'
+        self.current_turn = "b" if self.current_turn == "w" else "w"
 
     def ai_move_if_needed(self):
         if not self.is_ai_turn():
@@ -373,14 +438,18 @@ class Game:
         for r in range(ROWS):
             for c in range(COLS):
                 color = LIGHT if (r + c) % 2 == 0 else DARK
-                rect = pygame.Rect(c * SQUARE_SIZE, r * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+                rect = pygame.Rect(
+                    c * SQUARE_SIZE, r * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE
+                )
                 pygame.draw.rect(self.screen, color, rect)
 
     def _draw_highlights(self):
         # Selected square
         if self.selected:
             sr, sc = self.selected
-            rect = pygame.Rect(sc * SQUARE_SIZE, sr * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
+            rect = pygame.Rect(
+                sc * SQUARE_SIZE, sr * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE
+            )
             pygame.draw.rect(self.screen, SELECTED, rect, 0)
 
             # Re-draw top highlight border to distinguish
@@ -405,7 +474,7 @@ class Game:
                 piece = self.board.get(r, c)
                 if piece:
                     glyph = UNICODE_PIECES[piece]
-                    text_color = (10, 10, 10) if piece[0] == 'b' else (250, 250, 250)
+                    text_color = (10, 10, 10) if piece[0] == "b" else (250, 250, 250)
                     # Drop shadow for contrast
                     shadow = self.font.render(glyph, True, (0, 0, 0))
                     text = self.font.render(glyph, True, text_color)
@@ -434,11 +503,12 @@ class Game:
         pygame.quit()
         sys.exit()
 
+
 # ---------------------------
 # Entry point
 # ---------------------------
 if __name__ == "__main__":
     # Human plays White, AI plays Black by default.
     # To switch, set ai_color='w' and adapt input handling if desired.
-    game = Game(ai_color='b')
+    game = Game(ai_color="b")
     game.run()
